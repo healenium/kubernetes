@@ -74,8 +74,7 @@ helm dependency build
 
 Install PostgreSQL Helm chart
 ```sh
-helm install <postgresql-release-name> bitnami/postgresql --set global.postgresql.auth.postgresPassword=<admin-password>,global.postgresql.auth.username=<healenium-user-name>,global.postgresql.auth.password=<healenium-user-password>,global.postgresql.auth.database=<healenium-database>
--f ./postgresql/values.yaml
+helm install <postgresql-release-name> bitnami/postgresql --set global.postgresql.auth.postgresPassword=<admin-password>,global.postgresql.auth.username=<healenium-user-name>,global.postgresql.auth.password=<healenium-user-password>,global.postgresql.auth.database=<healenium-database> -f ./postgresql/values.yaml
 ```
 Example:
 ```sh
