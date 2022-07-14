@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.hlmbackend.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.hlmbackend.name }}
+spec:
+  ports:
+  - name: headless
+    protocol: TCP
+    port: {{ .Values.hlmbackend.port }}
+    targetPort: {{ .Values.hlmbackend.port }}
+  selector:
+    component: {{ .Values.hlmbackend.name }}
+  type: ClusterIP

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.imitator.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.imitator.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.imitator.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.imitator.name }}
+    spec:
+      containers:
+        - name: {{ .Values.imitator.name }}
+          image: "{{ .Values.imitator.repository }}:{{ .Values.imitator.tag }}"
+          ports:
+            - containerPort: {{ .Values.imitator.port }}
+              protocol: TCP
+          resources:
+            requests:
+              cpu: {{ .Values.imitator.resources.requests.cpu }}
+              memory: {{ .Values.imitator.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.imitator.resources.limits.cpu }}
+              memory: {{ .Values.imitator.resources.limits.memory }}

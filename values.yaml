@@ -1,0 +1,68 @@
+
+hlmbackend:
+  name: hlm-backend
+  repository: healenium/hlm-backend
+  tag: 3.2.3
+  port: 7878
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1024Mi
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+
+postgresql:
+  installdep:
+    enable: false
+  endpoint:
+    address: db-postgresql.default.svc.cluster.local
+    port: 5432
+    user: healenium_user
+    dbName: healenium
+    schema: healenium
+    password: YDk2nmNs4s9aCP6K
+
+imitator:
+  name: hlm-selector-imitator
+  repository: healenium/hlm-selector-imitator
+  tag: 1.1
+  port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+hlmproxy:
+  # IF YOU USE HLM-WEB FOR JAVA TESTS SET ENABLE TO false
+  enable: true
+  name: hlm-proxy
+  repository: healenium/hlm-proxy
+  tag: 1.0.0
+  port: 8085
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1024Mi
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+  environment:
+    selenium_host: selenium-hub.default.svc
+    selenium_port: 4444
+    selenium_url: /
+  healing:
+    healenabled: true
+    recoverytries: 1
+    scorecap: .6
+
+ingress:
+  enable: true
+  # IF YOU HAVE SOME DOMAIN NAME SET INGRESS.USEDOMAINNAME to true
+  usedomainname: false
+  hosts: 
+    - healenium.k8s.com
+

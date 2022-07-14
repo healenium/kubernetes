@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.hlmbackend.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.hlmbackend.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: {{ .Values.hlmbackend.name }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.hlmbackend.name }}
+    spec:
+      containers:
+        - name: hlm-backend
+          image: "{{ .Values.hlmbackend.repository }}:{{ .Values.hlmbackend.tag }}"
+          ports:
+            - containerPort: {{ .Values.hlmbackend.port }}
+              protocol: TCP
+          env:
+            - name: SPRING_POSTGRES_DB
+              value: {{ .Values.postgresql.endpoint.dbName }}
+            - name: SPRING_POSTGRES_SCHEMA
+              value: {{ .Values.postgresql.endpoint.schema }}
+            - name: SPRING_POSTGRES_USER
+              value: {{ .Values.postgresql.endpoint.user }}
+            - name: SPRING_POSTGRES_PASSWORD
+              value: {{ .Values.postgresql.endpoint.password }}
+            - name: SPRING_POSTGRES_DB_HOST
+              value: {{ .Values.postgresql.endpoint.address }}
+          resources:
+            requests:
+              cpu: {{ .Values.hlmbackend.resources.requests.cpu }}
+              memory: {{ .Values.hlmbackend.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.hlmbackend.resources.limits.cpu }}
+              memory: {{ .Values.hlmbackend.resources.limits.memory }}

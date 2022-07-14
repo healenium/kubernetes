@@ -1,0 +1,18 @@
+{{- if .Values.hlmproxy.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.hlmproxy.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.hlmproxy.name }}
+spec:
+  ports:
+  - name: headless
+    protocol: TCP
+    port: {{ .Values.hlmproxy.port }}
+    targetPort: {{ .Values.hlmproxy.port }}
+  selector:
+    component: {{ .Values.hlmproxy.name }}
+  type: ClusterIP
+{{- end }}

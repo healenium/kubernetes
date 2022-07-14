@@ -1,0 +1,6 @@
+primary:
+  initdb:
+    scripts:
+      init_postgres.sh: |
+        #!/bin/sh
+        /opt/bitnami/postgresql/bin/psql -U postgres -d ${POSTGRES_DB} -c 'CREATE SCHEMA healenium AUTHORIZATION healenium_user; GRANT USAGE ON SCHEMA healenium TO healenium_user;'
