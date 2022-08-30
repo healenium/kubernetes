@@ -35,7 +35,7 @@ spec:
             - name: KEY_SELECTOR_URL
               value: {{ .Values.hlmbackend.keySelectorUrl }}
             - name: KEY_SELECTOR_PATH
-              value: {{ .Values.hlmbackend.keySelectorPath l}}
+              value: {{ .Values.hlmbackend.keySelectorPath }}
           resources:
             requests:
               cpu: {{ .Values.hlmbackend.resources.requests.cpu }}
