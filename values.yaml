@@ -5,6 +5,7 @@ hlmbackend:
   tag: 3.2.4
   port: 7878
   keySelectorUrl: true
+  keySelectorPath: true
   resources:
     requests:
       cpu: 200m
