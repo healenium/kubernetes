@@ -4,6 +4,7 @@ hlmbackend:
   repository: healenium/hlm-backend
   tag: 3.2.4
   port: 7878
+  address: http://localhost:7878
   keySelectorUrl: true
   keySelectorPath: true
   resources:
@@ -43,7 +44,7 @@ hlmproxy:
   enable: true
   name: hlm-proxy
   repository: healenium/hlm-proxy
-  tag: 1.1.0
+  tag: 1.2.0
   port: 8085
   resources:
     requests:
@@ -53,9 +54,8 @@ hlmproxy:
       cpu: 1000m
       memory: 2048Mi
   environment:
-    selenium_host: selenium-hub.default.svc
-    selenium_port: 4444
-    selenium_url: /
+    selenium_server_url: http://selenium-hub.default.svc:4444/
+    appium_server_url: http://host.docker.internal:4723/wd/hub
   healing:
     healenabled: true
     recoverytries: 1
@@ -65,6 +65,6 @@ ingress:
   enable: true
   # IF YOU HAVE SOME DOMAIN NAME SET INGRESS.USEDOMAINNAME to true
   usedomainname: false
-  hosts: 
+  hosts:
     - healenium.k8s.com
 

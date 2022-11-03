@@ -22,23 +22,23 @@ spec:
           ports:
             - containerPort: {{ .Values.hlmproxy.port }}
               protocol: TCP
-          env: 
+          env:
             - name: HEAL_ENABLED
               value: "{{ .Values.hlmproxy.healing.healenabled }}"
             - name: RECOVERY_TRIES
               value: "{{ .Values.hlmproxy.healing.recoverytries }}"
             - name: SCORE_CAP
               value: "{{ .Values.hlmproxy.healing.scorecap }}"
-            - name: SELENIUM_HOST
-              value: "{{ .Values.hlmproxy.environment.selenium_host }}"
-            - name: SELENIUM_PORT
-              value: "{{ .Values.hlmproxy.environment.selenium_port }}"
-            - name: SELENIUM_URL
-              value: {{ .Values.hlmproxy.environment.selenium_url }}
-            - name: HEALENIUM_HOST
-              value: {{ .Values.hlmbackend.name }}
-            - name: IMITATE_HOST
-              value: {{ .Values.imitator.name }}
+            - name: SELENIUM_SERVER_URL
+              value: {{ .Values.hlmproxy.environment.selenium_server_url }}
+            - name: APPIUM_SERVER_URL
+              value: {{ .Values.hlmproxy.environment.appium_server_url }}
+            - name: HEALENIUM_SERVICE
+              value: "http://{{ .Values.hlmbackend.name }}:{{ .Values.hlmbackend.port }}"
+            - name: HEALENIUM_SERVER_URL
+              value: {{ .Values.hlmbackend.address }}
+            - name: IMITATE_SERVICE
+              value: "http://{{ .Values.imitator.name }}:{{ .Values.imitator.port }}"
           resources:
             requests:
               cpu: {{ .Values.hlmproxy.resources.requests.cpu }}
@@ -46,4 +46,4 @@ spec:
             limits:
               cpu: {{ .Values.hlmproxy.resources.limits.cpu }}
               memory: {{ .Values.hlmproxy.resources.limits.memory }}
-{{- end }}
+  {{- end }}
