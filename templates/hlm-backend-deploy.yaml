@@ -33,9 +33,11 @@ spec:
             - name: SPRING_POSTGRES_DB_HOST
               value: {{ .Values.postgresql.endpoint.address }}
             - name: KEY_SELECTOR_URL
-              value: "{{ .Values.hlmbackend.keySelectorUrl }}"
-            - name: KEY_SELECTOR_PATH
-              value: "{{ .Values.hlmbackend.keySelectorPath }}"
+              value: "{{ .Values.hlmbackend.environment.key_selector_url }}"
+            - name: COLLECT_METRICS
+              value: "{{ .Values.hlmbackend.environment.collect_metrics }}"
+            - name: HLM_LOG_LEVEL
+              value: {{ .Values.hlmbackend.environment.hlm_log_level }}
           resources:
             requests:
               cpu: {{ .Values.hlmbackend.resources.requests.cpu }}
