@@ -115,7 +115,7 @@ hlmproxy:
   enable: true
   name: hlm-proxy
   repository: healenium/hlm-proxy
-  tag: 1.2.0
+  tag: 1.3.2
   port: 8085
   resources:
     requests:
@@ -127,6 +127,7 @@ hlmproxy:
   environment:
     selenium_server_url: http://selenium-hub.default.svc:4444/
     appium_server_url: http://host.docker.internal:4723/wd/hub
+    hlm_log_level: info
   healing:
     healenabled: true
     recoverytries: 1
