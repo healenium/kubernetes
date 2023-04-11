@@ -15,7 +15,7 @@ hlmbackend:
   environment:
     key_selector_url: false
     collect_metrics: true
-    hlm_log_level: debug
+    hlm_log_level: info
 
 postgresql:
   installdep:
@@ -56,7 +56,7 @@ hlmproxy:
       cpu: 1000m
       memory: 2048Mi
   environment:
-    selenium_server_url: http://selenium-hub.default.svc:4444/
+    selenium_server_url: http://selenium-hub.default.svc:4444
     appium_server_url: http://host.docker.internal:4723/wd/hub
     hlm_log_level: info
   healing:
