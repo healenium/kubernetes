@@ -36,6 +36,8 @@ spec:
               value: "{{ .Values.hlmbackend.environment.key_selector_url }}"
             - name: COLLECT_METRICS
               value: "{{ .Values.hlmbackend.environment.collect_metrics }}"
+            - name: FIND_ELEMENTS_AUTO_HEALING
+              value: "{{ .Values.hlmbackend.environment.find_elements_auto_healing }}"
             - name: HLM_LOG_LEVEL
               value: {{ .Values.hlmbackend.environment.hlm_log_level }}
           resources:
