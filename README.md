@@ -69,17 +69,14 @@ git clone https://github.com/healenium/kubernetes.git
 
 Build Healenium Chart dependency:
 ```sh
-helm dependency build
+sudo helm dependency build
 ```
 
 Install PostgreSQL Helm chart
 ```sh
-helm install <postgresql-release-name> bitnami/postgresql --set global.postgresql.auth.postgresPassword=<admin-password>,global.postgresql.auth.username=<healenium-user-name>,global.postgresql.auth.password=<healenium-user-password>,global.postgresql.auth.database=<healenium-database> -f ./postgresql/values.yaml
+helm install db bitnami/postgresql  -f ./postgresql/values.yaml
 ```
-Example:
-```sh
-helm install db bitnami/postgresql --set global.postgresql.auth.postgresPassword=admin,global.postgresql.auth.username=healenium_user,global.postgresql.auth.password=YDk2nmNs4s9aCP6K,global.postgresql.auth.database=healenium -f ./postgresql/values.yaml
-```
+
 Install Selenium-Grid Helm chart:
 >You don't need to install Selenium-Grid if you use healenium-web lib. If so skip this step
 

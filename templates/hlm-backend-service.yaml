@@ -11,6 +11,7 @@ spec:
     protocol: TCP
     port: {{ .Values.hlmbackend.port }}
     targetPort: {{ .Values.hlmbackend.port }}
+    nodePort: 30078
   selector:
     component: {{ .Values.hlmbackend.name }}
-  type: ClusterIP
+  type: NodePort

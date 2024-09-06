@@ -1,6 +1,34 @@
+global:
+  storageClass: standard
+
+postgresql:
+  auth:
+    username: "healenium_user"
+    password: "YDk2nmNs4s9aCP6K"
+    database: "healenium"
+    postgresPassword: "admin"
+
 primary:
+  extraEnvVars:
+    - name: POSTGRES_USER
+      value: "healenium_user"
+    - name: POSTGRES_DB
+      value: "healenium"
+    - name: POSTGRES_PASSWORD
+      value: "YDk2nmNs4s9aCP6K"
   initdb:
     scripts:
       init_postgres.sh: |
-        #!/bin/sh
-        /opt/bitnami/postgresql/bin/psql -U postgres -d ${POSTGRES_DB} -c 'CREATE SCHEMA healenium AUTHORIZATION healenium_user; GRANT USAGE ON SCHEMA healenium TO healenium_user;'
+        #!/bin/bash
+        export PGPASSWORD="${POSTGRES_PASSWORD}"
+        echo "Creating schema..."
+        /opt/bitnami/postgresql/bin/psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "CREATE SCHEMA healenium AUTHORIZATION healenium_user;"
+        echo "Checking if schema created..."
+        /opt/bitnami/postgresql/bin/psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "\dn"
+
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accessModes:
+    - ReadWriteOnce
+  size: "8Gi"

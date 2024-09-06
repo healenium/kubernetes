@@ -57,7 +57,7 @@ hlmproxy:
       cpu: 1000m
       memory: 2048Mi
   environment:
-    selenium_server_url: http://selenium-hub.default.svc:4444
+    selenium_server_url: http://selenium-grid-selenium-hub.default.svc:4444/wd/hub
     appium_server_url: http://host.docker.internal:4723/wd/hub
     hlm_log_level: info
   healing:

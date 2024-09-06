@@ -12,7 +12,8 @@ spec:
     protocol: TCP
     port: {{ .Values.hlmproxy.port }}
     targetPort: {{ .Values.hlmproxy.port }}
+    nodePort: 30085
   selector:
     component: {{ .Values.hlmproxy.name }}
-  type: ClusterIP
+  type: NodePort
 {{- end }}
