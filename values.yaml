@@ -64,10 +64,3 @@ hlmproxy:
     recoverytries: 1
     scorecap: .6
 
-ingress:
-  enable: true
-  # IF YOU HAVE SOME DOMAIN NAME SET INGRESS.USEDOMAINNAME to true
-  usedomainname: true
-  hosts:
-    - healenium.k8s.com
-
