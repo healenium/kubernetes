@@ -27,7 +27,6 @@ postgresql:
     user: healenium_user
     dbName: healenium
     schema: healenium
-    password: YDk2nmNs4s9aCP6K
 
 imitator:
   name: hlm-selector-imitator

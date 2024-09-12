@@ -74,7 +74,7 @@ sudo helm dependency build
 
 Install PostgreSQL Helm chart
 ```sh
-helm install db bitnami/postgresql  -f ./postgresql/values.yaml
+helm install db bitnami/postgresql -f ./postgresql/values.yaml
 ```
 
 Install Selenium-Grid Helm chart:
@@ -89,7 +89,7 @@ helm repo add docker-selenium https://www.selenium.dev/docker-selenium && helm r
 
 Install Selenium-Grid Helm chart: 
 ```sh
-helm install selenium-grid docker-selenium/selenium-grid
+helm install selenium-grid docker-selenium/selenium-grid --set basicAuth.enabled=false
 ```
 > Before you deploy Healenium you should have installed all its requirements. Their versions are described in requirements.yaml
 > You should also specify correct PostgreSQL and Selenium-Grid addresses and ports in values.yaml

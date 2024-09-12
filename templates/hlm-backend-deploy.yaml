@@ -29,7 +29,10 @@ spec:
             - name: SPRING_POSTGRES_USER
               value: {{ .Values.postgresql.endpoint.user }}
             - name: SPRING_POSTGRES_PASSWORD
-              value: {{ .Values.postgresql.endpoint.password }}
+              valueFrom:
+                secretKeyRef:
+                  name: hlm-secret
+                  key: userPassword
             - name: SPRING_POSTGRES_DB_HOST
               value: {{ .Values.postgresql.endpoint.address }}
             - name: KEY_SELECTOR_URL
