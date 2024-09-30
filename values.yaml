@@ -46,7 +46,7 @@ hlmproxy:
   enable: true
   name: hlm-proxy
   repository: healenium/hlm-proxy
-  tag: 1.4.1
+  tag: 2.1.0
   port: 8085
   resources:
     requests:
