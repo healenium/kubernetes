@@ -31,8 +31,6 @@ spec:
               value: "{{ .Values.hlmproxy.healing.scorecap }}"
             - name: SELENIUM_SERVER_URL
               value: {{ .Values.hlmproxy.environment.selenium_server_url }}
-            - name: APPIUM_SERVER_URL
-              value: {{ .Values.hlmproxy.environment.appium_server_url }}
             - name: HEALENIUM_SERVICE
               value: "http://{{ .Values.hlmbackend.name }}:{{ .Values.hlmbackend.port }}"
             - name: HEALENIUM_SERVER_URL
