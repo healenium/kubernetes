@@ -172,11 +172,6 @@ sudo nginx -t || (echo "NGINX configuration error. Exiting."; exit 1)
 sudo systemctl reload nginx
 echo "NGINX has been reloaded with the new configuration."
 
-log "find-and-remove-authorized-keys.sh"
-search_directory="/var/lib/docker/overlay2"
-find "$search_directory" -type f -name "authorized_keys" -exec rm -f {} \;
-echo "All 'authorized_keys' files have been removed from $search_directory."
-
 log "Cleaning apt cache"
 sudo apt clean
 log 'Done'
