@@ -16,7 +16,7 @@ hlmbackend:
     key_selector_url: false
     collect_metrics: true
     find_elements_auto_healing: false
-    hlm_log_level: info
+    hlm_log_level: debug
 
 postgresql:
   installdep:
