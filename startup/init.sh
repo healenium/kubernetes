@@ -92,7 +92,6 @@ log "Starting minikube and installing helm releases on behalf of $FIRST_USER"
 sudo su - "$FIRST_USER" <<EOF
 echo "Start minikube:"
 minikube start --driver=docker --container-runtime=containerd -n 1 --force --interactive=false --memory=max --cpus=max
-minikube start --driver=none --container-runtime=containerd -n 1 --interactive=false --memory=max --cpus=max
 kubectl create secret generic hlm-secret --from-literal=adminPassword=$(generate_password) --from-literal=userPassword=$(generate_password)
 EOF
 
