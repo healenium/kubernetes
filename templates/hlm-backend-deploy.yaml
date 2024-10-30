@@ -43,6 +43,9 @@ spec:
               value: "{{ .Values.hlmbackend.environment.find_elements_auto_healing }}"
             - name: HLM_LOG_LEVEL
               value: {{ .Values.hlmbackend.environment.hlm_log_level }}
+          volumeMounts:
+            - name: screenshots-volume
+              mountPath: "/screenshots"
           resources:
             requests:
               cpu: {{ .Values.hlmbackend.resources.requests.cpu }}
@@ -50,3 +53,7 @@ spec:
             limits:
               cpu: {{ .Values.hlmbackend.resources.limits.cpu }}
               memory: {{ .Values.hlmbackend.resources.limits.memory }}
+      volumes:
+        - name: screenshots-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.hlmbackend.pvClaimName }}

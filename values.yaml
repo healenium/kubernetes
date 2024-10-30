@@ -17,6 +17,7 @@ hlmbackend:
     collect_metrics: true
     find_elements_auto_healing: false
     hlm_log_level: debug
+  pvClaimName: "screenshots-pvc"
 
 postgresql:
   installdep:
@@ -62,4 +63,3 @@ hlmproxy:
     healenabled: true
     recoverytries: 1
     scorecap: .6
-
