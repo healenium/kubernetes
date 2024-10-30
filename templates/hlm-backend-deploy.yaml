@@ -61,4 +61,4 @@ spec:
             claimName: {{ .Values.hlmbackend.screenshotsPvClaimName }}
         - name: logs-volume
           persistentVolumeClaim:
-            claimName: { { .Values.hlmbackend.logsPvClaimName } }
+            claimName: {{ .Values.hlmbackend.logsPvClaimName }}

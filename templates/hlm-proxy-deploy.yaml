@@ -52,5 +52,5 @@ spec:
       volumes:
         - name: logs-volume
           persistentVolumeClaim:
-            claimName: { { .Values.hlmproxy.logsPvClaimName } }
+            claimName: {{ .Values.hlmproxy.logsPvClaimName }}
   {{- end }}
