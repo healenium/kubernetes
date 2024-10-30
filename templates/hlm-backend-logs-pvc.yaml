@@ -1,11 +1,14 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: screenshots-pvc
+  name: hlm-backend-logs-pvc
 spec:
   storageClassName: manual
+  selector:
+    matchLabels:
+      type: hlm-backend-logs
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: screenshots-pvc
+spec:
+  storageClassName: manual
+  selector:
+    matchLabels:
+      type: screenshots
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

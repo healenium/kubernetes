@@ -39,6 +39,9 @@ spec:
               value: "http://{{ .Values.imitator.name }}:{{ .Values.imitator.port }}"
             - name: HLM_LOG_LEVEL
               value: {{ .Values.hlmproxy.environment.hlm_log_level }}
+          volumeMounts:
+            - name: logs-volume
+              mountPath: "/logs"
           resources:
             requests:
               cpu: {{ .Values.hlmproxy.resources.requests.cpu }}
@@ -46,4 +49,8 @@ spec:
             limits:
               cpu: {{ .Values.hlmproxy.resources.limits.cpu }}
               memory: {{ .Values.hlmproxy.resources.limits.memory }}
+      volumes:
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: { { .Values.hlmproxy.logsPvClaimName } }
   {{- end }}

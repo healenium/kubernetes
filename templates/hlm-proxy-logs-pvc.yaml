@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hlm-proxy-logs-pvc
+spec:
+  storageClassName: manual
+  selector:
+    matchLabels:
+      type: hlm-proxy-logs
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

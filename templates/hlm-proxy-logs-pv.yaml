@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: screenshots-pv
+  name: hlm-proxy-logs-pv
   labels:
-    type: local
+    type: hlm-proxy-logs
 spec:
   storageClassName: manual
   capacity:
-    storage: 1Gi
+    storage: 2Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/data/screenshots"
+    path: "/mnt/data/proxy/logs"

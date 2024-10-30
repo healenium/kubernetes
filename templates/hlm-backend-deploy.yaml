@@ -46,6 +46,8 @@ spec:
           volumeMounts:
             - name: screenshots-volume
               mountPath: "/screenshots"
+            - name: logs-volume
+              mountPath: "/logs"
           resources:
             requests:
               cpu: {{ .Values.hlmbackend.resources.requests.cpu }}
@@ -56,4 +58,7 @@ spec:
       volumes:
         - name: screenshots-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.hlmbackend.pvClaimName }}
+            claimName: {{ .Values.hlmbackend.screenshotsPvClaimName }}
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: { { .Values.hlmbackend.logsPvClaimName } }
