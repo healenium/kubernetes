@@ -55,6 +55,19 @@ jobs:
           # Upload chart to GitHub releases
           ./cr upload -o "$owner" -r "$repo" -t "${{ secrets.GITHUB_TOKEN }}"
           
+          # Create gh-pages branch if it doesn't exist
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          
+          if ! git ls-remote --heads origin gh-pages | grep gh-pages > /dev/null; then
+            echo "Creating gh-pages branch..."
+            git checkout --orphan gh-pages
+            git rm -rf .
+            git commit --allow-empty -m "Initialize gh-pages"
+            git push origin gh-pages
+            git checkout master
+          fi
+          
           # Update index and push to gh-pages
-          ./cr index -o "$owner" -r "$repo" -c https://healenium.github.io/kubernetes -i index.yaml -t "${{ secrets.GITHUB_TOKEN }}" --push
+          ./cr index -o "$owner" -r "$repo" -i index.yaml -t "${{ secrets.GITHUB_TOKEN }}" --push
 
