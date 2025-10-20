@@ -4,10 +4,8 @@ name: healenium
 description: Healenium Helm chart for Kubernetes - Self-healing test automation framework
 version: 0.1.0
 home: https://healenium.io
-icon: https://avatars.githubusercontent.com/u/62437675
 sources:
   - https://github.com/healenium/kubernetes
-  - https://github.com/healenium/healenium
 maintainers:
   - name: Healenium Team
     url: https://github.com/healenium
