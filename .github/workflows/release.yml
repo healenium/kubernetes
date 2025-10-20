@@ -31,16 +31,24 @@ jobs:
         with:
           version: v3.14.0
 
-      - name: Prepare charts directory structure
+      - name: Package Helm Chart
         run: |
           mkdir -p .cr-release-packages
-          mkdir -p charts/healenium
-          cp -r Chart.yaml values.yaml requirements.yaml templates postgresql charts/healenium/
+          helm package . -d .cr-release-packages
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
-        with:
-          charts_dir: charts
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Upload Release and Update Index
+        run: |
+          owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")
+          repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")
+          
+          # Install chart-releaser
+          curl -sSLo cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/v1.6.0/chart-releaser_1.6.0_linux_amd64.tar.gz"
+          tar -xzf cr.tar.gz
+          rm -f cr.tar.gz
+          
+          # Upload chart to GitHub releases
+          ./cr upload -o "$owner" -r "$repo" -t "${{ secrets.GITHUB_TOKEN }}"
+          
+          # Update index and push to gh-pages
+          ./cr index -o "$owner" -r "$repo" -c https://healenium.github.io/kubernetes -i index.yaml -t "${{ secrets.GITHUB_TOKEN }}" --push
 
