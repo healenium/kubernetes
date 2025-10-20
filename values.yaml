@@ -26,7 +26,7 @@ postgresql:
     port: 5432
     user: healenium_user
     dbName: healenium
-    schema: healenium
+    schema: public
     password: YDk2nmNs4s9aCP6K
 
 imitator:

@@ -15,6 +15,14 @@ spec:
       labels:
         component: {{ .Values.hlmbackend.name }}
     spec:
+      initContainers:
+        - name: create-schema
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              PGPASSWORD={{ .Values.postgresql.endpoint.password }} psql -h {{ .Values.postgresql.endpoint.address }} -U {{ .Values.postgresql.endpoint.user }} -d {{ .Values.postgresql.endpoint.dbName }} -c "CREATE SCHEMA IF NOT EXISTS {{ .Values.postgresql.endpoint.schema }};" || true
       containers:
         - name: hlm-backend
           image: "{{ .Values.hlmbackend.repository }}:{{ .Values.hlmbackend.tag }}"
@@ -32,6 +40,12 @@ spec:
               value: {{ .Values.postgresql.endpoint.password }}
             - name: SPRING_POSTGRES_DB_HOST
               value: {{ .Values.postgresql.endpoint.address }}
+            - name: SPRING_LIQUIBASE_LIQUIBASESCHEMA
+              value: {{ .Values.postgresql.endpoint.schema }}
+            - name: SPRING_LIQUIBASE_DEFAULTSCHEMA
+              value: {{ .Values.postgresql.endpoint.schema }}
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA
+              value: {{ .Values.postgresql.endpoint.schema }}
             - name: KEY_SELECTOR_URL
               value: "{{ .Values.hlmbackend.environment.key_selector_url }}"
             - name: COLLECT_METRICS
