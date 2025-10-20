@@ -91,14 +91,14 @@ helm search repo healenium -l
 
 #### Upgrade to a specific version:
 ```sh
-helm upgrade healenium healenium/healenium --version 0.1.0
+helm upgrade healenium healenium/healenium --version 2.1.9
 ```
 
 > For detailed installation instructions and manual setup, see the [Minikube installation](#minikube) section below.
 
 ### Minikube
 
-Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a Virtual Machine (VM) on your laptopS
+Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a Virtual Machine (VM) on your laptop.
 
 #### Prerequisites
 
@@ -116,19 +116,20 @@ Install the Ingress plugin:
 minikube addons enable ingress
 ```
 
-Initialize Bitname Helm package manager:
+Initialize Helm repositories:
 ```sh
-helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update
-```
-Clone Healenium Chart repository:
-```sh
-git clone https://github.com/healenium/kubernetes.git
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add healenium https://healenium.github.io/kubernetes
+helm repo update
 ```
 
-Build Healenium Chart dependency:
-```sh
-helm dependency build
-```
+> **Note**: You can now install Healenium directly from the public Helm repository without cloning! 
+> For development or customization, you can still clone the repository:
+> ```sh
+> git clone https://github.com/healenium/kubernetes.git
+> cd kubernetes
+> helm dependency build
+> ```
 
 Install PostgreSQL Helm chart
 ```sh
@@ -173,7 +174,7 @@ hlmproxy:
   enable: true
   name: hlm-proxy
   repository: healenium/hlm-proxy
-  tag: 1.3.2
+  tag: 2.1.9
   port: 8085
   resources:
     requests:
@@ -192,13 +193,23 @@ hlmproxy:
     scorecap: .6
 ```
 
-Deploy the Healenium Chart within [Healenium-Proxy](https://github.com/healenium/healenium):
+Deploy Healenium from public Helm repository:
+
+**Option 1: With Proxy** (for all Selenium languages - Java/Python/JS/C#):
 ```sh
-helm install healenium .
+helm install healenium healenium/healenium
 ```
 
-Deploy the Healenium Chart within [Healenium-Web](https://github.com/healenium/healenium-web):
+**Option 2: Java only** (using [Healenium-Web](https://github.com/healenium/healenium-web) lib):
 ```sh
+helm install healenium healenium/healenium --set hlmproxy.enable=false
+```
+
+**Option 3: From local files** (for development/customization):
+```sh
+# If you cloned the repository
+helm install healenium .
+# or with proxy disabled
 helm install healenium --set hlmproxy.enable=false .
 ```
 
