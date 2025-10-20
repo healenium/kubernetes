@@ -3,6 +3,33 @@ entries:
   healenium:
   - apiVersion: v1
     appVersion: 0.1.0
+    created: "2025-10-20T14:27:11.91938286Z"
+    dependencies:
+    - condition: postgresql.installdep.enable
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 11.6.2
+    description: Healenium Helm chart for Kubernetes - Self-healing test automation
+      framework
+    digest: cdaca10a8b3b61f18f5f5089a3d367d544355f98ad0c4d55884b33e2c6ae7a83
+    home: https://healenium.io
+    keywords:
+    - healenium
+    - selenium
+    - testing
+    - test-automation
+    - self-healing
+    maintainers:
+    - name: Healenium Team
+      url: https://github.com/healenium
+    name: healenium
+    sources:
+    - https://github.com/healenium/kubernetes
+    urls:
+    - https://github.com/healenium/kubernetes/releases/download/healenium-2.1.9/healenium-2.1.9.tgz
+    version: 2.1.9
+  - apiVersion: v1
+    appVersion: 0.1.0
     created: "2025-10-20T13:43:52.377191273Z"
     dependencies:
     - condition: postgresql.installdep.enable
@@ -28,4 +55,4 @@ entries:
     urls:
     - https://github.com/healenium/kubernetes/releases/download/healenium-0.1.3/healenium-0.1.3.tgz
     version: 0.1.3
-generated: "2025-10-20T13:43:52.377208605Z"
+generated: "2025-10-20T14:27:11.919395163Z"
