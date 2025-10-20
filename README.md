@@ -3,10 +3,14 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/healenium/hlm-backend.svg?maxAge=25920)](https://hub.docker.com/u/healenium)
 [![License](https://img.shields.io/badge/license-Apache-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/healenium)](https://artifacthub.io/packages/search?repo=healenium)
+[![Helm Chart](https://img.shields.io/badge/Helm-Chart-blue)](https://healenium.github.io/kubernetes)
 
 ### Table of Contents
 
 [Overall information](#overall-information)
+
+[Quick Start](#quick-start)
 
 [Minikube installation](#minikube)
 * [Prerequisites](#prerequisites)
@@ -36,7 +40,61 @@ All configuration variables are presented in `value.yaml` file.
 Before you deploy Healenium you should have installed all its dependencies (requirements).
 You should have Kubernetes cluster is up and running. Please follow the guides below to run your Kubernetes cluster on different platforms.
 
-> For matching the installation commands on this guide with your command line, please download this Helm chart to your machine.
+### Quick Start
+
+You can now install Healenium directly from our public Helm repository without cloning the repository!
+
+#### Add Healenium Helm repository:
+```sh
+helm repo add healenium https://healenium.github.io/kubernetes
+helm repo update
+```
+
+#### Install PostgreSQL (required dependency):
+```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install db bitnami/postgresql \
+  --set global.postgresql.auth.postgresPassword=admin \
+  --set global.postgresql.auth.username=healenium_user \
+  --set global.postgresql.auth.password=YDk2nmNs4s9aCP6K \
+  --set global.postgresql.auth.database=healenium \
+  --set primary.persistence.enabled=true
+```
+
+#### Install Selenium-Grid (optional, only for Healenium-Proxy):
+> Skip this step if you use healenium-web lib
+
+```sh
+helm repo add docker-selenium https://www.selenium.dev/docker-selenium
+helm install selenium-grid docker-selenium/selenium-grid
+```
+
+#### Install Healenium with Proxy (for all Selenium languages):
+```sh
+helm install healenium healenium/healenium
+```
+
+#### Or install Healenium for Java only (healenium-web):
+```sh
+helm install healenium healenium/healenium --set hlmproxy.enable=false
+```
+
+#### Customize installation with your values:
+```sh
+helm install healenium healenium/healenium -f your-custom-values.yaml
+```
+
+#### View available chart versions:
+```sh
+helm search repo healenium -l
+```
+
+#### Upgrade to a specific version:
+```sh
+helm upgrade healenium healenium/healenium --version 0.1.0
+```
+
+> For detailed installation instructions and manual setup, see the [Minikube installation](#minikube) section below.
 
 ### Minikube
 

@@ -1,0 +1,7 @@
+# Configuration for Chart Releaser
+# See https://github.com/helm/chart-releaser#config-file
+
+owner: healenium
+git-repo: kubernetes
+charts-repo-url: https://healenium.github.io/kubernetes
+
