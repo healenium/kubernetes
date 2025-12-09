@@ -125,6 +125,7 @@ EOF
 # Initialize Bitnami Helm package manager (run as FIRST_USER who has kubeconfig)
 log "Installing Helm charts from $SCRIPT_DIR"
 cd "$SCRIPT_DIR"
+sudo chown -R "$FIRST_USER:$FIRST_USER" "$SCRIPT_DIR"
 sudo -u "$FIRST_USER" helm repo add bitnami https://charts.bitnami.com/bitnami
 sudo -u "$FIRST_USER" helm repo add docker-selenium https://www.selenium.dev/docker-selenium
 sudo -u "$FIRST_USER" helm repo update
