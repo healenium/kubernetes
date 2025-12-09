@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.hlmai.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.hlmai.name }}
+spec:
+  ports:
+  - name: headless
+    protocol: TCP
+    port: {{ .Values.hlmai.port }}
+    targetPort: {{ .Values.hlmai.port }}
+    nodePort: 30065
+  selector:
+    component: {{ .Values.hlmai.name }}
+  type: NodePort

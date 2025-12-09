@@ -3,10 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: hlm-backend-logs-pvc
 spec:
-  storageClassName: manual
-  selector:
-    matchLabels:
-      type: hlm-backend-logs
+  storageClassName: standard
   accessModes:
     - ReadWriteOnce
   resources:

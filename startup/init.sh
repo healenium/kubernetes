@@ -1,9 +1,30 @@
 #!/bin/bash
-{
-export FIRST_USER=$(whoami)
+set -e
 
-log() { echo "[INFO] $(date) $1" >> /var/log/sre-init.log; }
-log_err() { echo "[ERROR] $(date) $1" >> /var/log/sre-init.log; }
+# Get the actual user (not root when using sudo)
+if [ -n "$SUDO_USER" ]; then
+  export FIRST_USER="$SUDO_USER"
+else
+  export FIRST_USER=$(whoami)
+fi
+
+# Get chart directory - user must run from kubernetes repo root or pass as argument
+if [ -n "$1" ]; then
+  SCRIPT_DIR="$1"
+elif [ -f "./Chart.yaml" ]; then
+  SCRIPT_DIR="$(pwd)"
+elif [ -f "../Chart.yaml" ]; then
+  SCRIPT_DIR="$(cd .. && pwd)"
+else
+  echo "ERROR: Chart.yaml not found!"
+  echo "Usage: cd /path/to/kubernetes && sudo bash startup/init.sh"
+  echo "   or: sudo bash /path/to/kubernetes/startup/init.sh /path/to/kubernetes"
+  exit 1
+fi
+echo "Using chart directory: $SCRIPT_DIR"
+
+log() { echo "[INFO] $(date) $1" | tee -a /var/log/sre-init.log; }
+log_err() { echo "[ERROR] $(date) $1" | tee -a /var/log/sre-init.log; }
 
 generate_password() {
   chars="20"
@@ -49,8 +70,8 @@ sudo DEBIAN_FRONTEND=noninteractive apt install -y git jq python3-pip unzip loca
 # Add Docker's official GPG key: from https://docs.docker.com/engine/install/debian/
 sudo DEBIAN_FRONTEND=noninteractive apt install -y ca-certificates curl software-properties-common
 sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
+sudo chmod a+r /etc/apt/trusted.gpg.d/docker.gpg
 
 # Add git apt repo
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/ubuntu \
@@ -79,36 +100,43 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubect
 
 
 # https://helm.sh/docs/intro/install/
-log "Installing helm"
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-sudo apt-get install apt-transport-https --yes
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | \
-  sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-sudo apt-get update
-sudo apt-get install helm
+log "Installing helm via official script (more reliable than apt)"
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 
-log "Starting minikube and installing helm releases on behalf of $FIRST_USER"
-sudo su - "$FIRST_USER" <<EOF
-echo "Start minikube:"
-minikube start --driver=docker --container-runtime=containerd -n 1 --force --interactive=false --memory=max --cpus=max
-kubectl create secret generic hlm-secret --from-literal=adminPassword=$(generate_password) --from-literal=userPassword=$(generate_password)
+log "Starting minikube on behalf of $FIRST_USER"
+ADMIN_PASS=$(generate_password)
+USER_PASS=$(generate_password)
+
+sudo -u "$FIRST_USER" bash <<EOF
+echo "Starting minikube..."
+# Start with 80% of available memory to leave room for system overhead
+TOTAL_MEM=\$(free -m | awk '/^Mem:/{print \$2}')
+MINIKUBE_MEM=\$(( TOTAL_MEM * 80 / 100 ))
+echo "Allocating \${MINIKUBE_MEM}MB to minikube (80% of \${TOTAL_MEM}MB total)"
+minikube start --driver=docker --container-runtime=containerd -n 1 --force --interactive=false --memory=\${MINIKUBE_MEM}m --cpus=max
+# Create secret (ignore if exists)
+kubectl create secret generic hlm-secret \
+  --from-literal=adminPassword=$ADMIN_PASS \
+  --from-literal=userPassword=$USER_PASS \
+  --dry-run=client -o yaml | kubectl apply -f -
 EOF
 
-# Initialize Bitname Helm package manager
-sudo helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update
-sudo helm dependency build
-sudo helm install db bitnami/postgresql -f ./postgresql/values.yaml
-sudo helm install healenium .
-
-sudo helm repo add docker-selenium https://www.selenium.dev/docker-selenium && helm repo update
-sudo helm install selenium-grid docker-selenium/selenium-grid
+# Initialize Bitnami Helm package manager (run as FIRST_USER who has kubeconfig)
+log "Installing Helm charts from $SCRIPT_DIR"
+cd "$SCRIPT_DIR"
+sudo -u "$FIRST_USER" helm repo add bitnami https://charts.bitnami.com/bitnami
+sudo -u "$FIRST_USER" helm repo add docker-selenium https://www.selenium.dev/docker-selenium
+sudo -u "$FIRST_USER" helm repo update
+sudo -u "$FIRST_USER" helm dependency build "$SCRIPT_DIR"
+sudo -u "$FIRST_USER" helm install db bitnami/postgresql -f "$SCRIPT_DIR/postgresql/values.yaml"
+sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR"
+sudo -u "$FIRST_USER" helm install selenium-grid docker-selenium/selenium-grid
 
 log "Enabling minikube service"
 enable_minikube_service
 
-set -e
-
+log "Installing NGINX"
 sudo apt-get update && sudo apt-get install nginx -y
 echo "NGINX is installed."
 
@@ -117,9 +145,13 @@ sudo chmod 700 /etc/nginx/ssl
 
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=OrgUnit/CN=example.com"
 
+# Create sites-available and sites-enabled if they don't exist (minimal Ubuntu)
+sudo mkdir -p /etc/nginx/sites-available
+sudo mkdir -p /etc/nginx/sites-enabled
+
 CONFIG_FILE="/etc/nginx/sites-available/default"
 
-sudo bash -c "cat > $CONFIG_FILE" <<'EOF'
+sudo tee "$CONFIG_FILE" > /dev/null <<'EOF'
 server {
 
 server_name localhost;
@@ -166,12 +198,14 @@ server_name localhost;
 }
 EOF
 
-sudo nginx -t || (echo "NGINX configuration error. Exiting."; exit 1)
+# Enable site
+sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+sudo nginx -t || { log_err "NGINX configuration error. Exiting."; exit 1; }
 
 sudo systemctl reload nginx
-echo "NGINX has been reloaded with the new configuration."
+log "NGINX has been reloaded with the new configuration."
 
 log "Cleaning apt cache"
 sudo apt clean
-log 'Done'
-} &> /var/log/healenium_startup.log
+log 'Done. Healenium installation complete!'

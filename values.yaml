@@ -1,10 +1,11 @@
 
 hlmbackend:
   name: hlm-backend
-  repository: healenium/hlm-backend
-  tag: 3.4.6
+  repository: aliakseiashukha/hlm-backend
+  tag: 3.5.0
   port: 7878
   address: http://localhost:7878
+  pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 200m
@@ -47,16 +48,16 @@ hlmproxy:
   # IF YOU USE HLM-WEB FOR JAVA TESTS SET ENABLE TO false
   enable: true
   name: hlm-proxy
-  repository: healenium/hlm-proxy
-  tag: 2.1.2
+  repository: aliakseiashukha/hlm-proxy
+  tag: 2.2.0
   port: 8085
   resources:
     requests:
       cpu: 200m
-      memory: 1024Mi
+      memory: 512Mi
     limits:
-      cpu: 1000m
-      memory: 2048Mi
+      cpu: 500m
+      memory: 1024Mi
   environment:
     selenium_server_url: http://selenium-grid-selenium-hub.default.svc:4444/wd/hub
     hlm_log_level: debug
@@ -65,3 +66,34 @@ hlmproxy:
     recoverytries: 1
     scorecap: .6
   logsPvClaimName: "hlm-proxy-logs-pvc"
+
+hlmai:
+  name: hlm-ai
+  repository: aliakseiashukha/healenium-ai
+  tag: 1.0.0
+  port: 6565
+  address: http://localhost:6565
+  pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  logsPvClaimName: "hlm-ai-logs-pvc"
+
+hlmui:
+  name: hlm-ui-dashboard
+  repository: aliakseiashukha/hlm-ui-dashboard
+  tag: 1.0.0
+  port: 5173
+  address: http://localhost:5173
+  pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 200m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi

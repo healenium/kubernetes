@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.hlmai.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.hlmai.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: {{ .Values.hlmai.name }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.hlmai.name }}
+    spec:
+      containers:
+        - name: hlm-proxy
+          image: "{{ .Values.hlmai.repository }}:{{ .Values.hlmai.tag }}"
+          ports:
+            - containerPort: {{ .Values.hlmai.port }}
+              protocol: TCP
+          env:
+            - name: HEALENIUM_SERVICE
+              value: "http://{{ .Values.hlmbackend.name }}:{{ .Values.hlmbackend.port }}"
+          volumeMounts:
+            - name: logs-volume
+              mountPath: "/logs"
+          resources:
+            requests:
+              cpu: {{ .Values.hlmai.resources.requests.cpu }}
+              memory: {{ .Values.hlmai.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.hlmai.resources.limits.cpu }}
+              memory: {{ .Values.hlmai.resources.limits.memory }}
+      volumes:
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.hlmai.logsPvClaimName }}

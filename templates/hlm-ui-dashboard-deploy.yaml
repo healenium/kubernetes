@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.hlmui.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.hlmui.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: {{ .Values.hlmui.name }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.hlmui.name }}
+    spec:
+      containers:
+        - name: hlm-proxy
+          image: "{{ .Values.hlmui.repository }}:{{ .Values.hlmui.tag }}"
+          ports:
+            - containerPort: {{ .Values.hlmui.port }}
+              protocol: TCP
+          env:
+            - name: VITE_API_BASE_URL
+              value: "http://{{ .Values.hlmbackend.name }}:{{ .Values.hlmbackend.port }}"
+          resources:
+            requests:
+              cpu: {{ .Values.hlmui.resources.requests.cpu }}
+              memory: {{ .Values.hlmui.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.hlmui.resources.limits.cpu }}
+              memory: {{ .Values.hlmui.resources.limits.memory }}
