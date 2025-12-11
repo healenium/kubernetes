@@ -37,6 +37,8 @@ spec:
               value: {{ .Values.hlmbackend.address }}
             - name: IMITATE_SERVICE
               value: "http://{{ .Values.imitator.name }}:{{ .Values.imitator.port }}"
+            - name: HEALENIUM_AI_SERVICE
+              value: "http://{{ .Values.hlmai.name }}:{{ .Values.hlmai.port }}"
             - name: HLM_LOG_LEVEL
               value: {{ .Values.hlmproxy.environment.hlm_log_level }}
           volumeMounts:
