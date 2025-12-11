@@ -16,14 +16,11 @@ spec:
         component: {{ .Values.hlmui.name }}
     spec:
       containers:
-        - name: hlm-proxy
+        - name: hlm-ui
           image: "{{ .Values.hlmui.repository }}:{{ .Values.hlmui.tag }}"
           ports:
             - containerPort: {{ .Values.hlmui.port }}
               protocol: TCP
-          env:
-            - name: VITE_API_BASE_URL
-              value: "http://{{ .Values.hlmbackend.name }}:{{ .Values.hlmbackend.port }}"
           resources:
             requests:
               cpu: {{ .Values.hlmui.resources.requests.cpu }}

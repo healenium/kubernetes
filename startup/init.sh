@@ -165,20 +165,13 @@ server_name localhost;
         ssl_certificate /etc/nginx/ssl/selfsigned.crt;
         ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
 
-         location /healenium {
-                proxy_pass http://192.168.49.2:30078;
-                proxy_set_header Host $http_host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /screenshots {
-                proxy_pass http://192.168.49.2:30078;
-                proxy_set_header Host $http_host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
+        # API routes → hlm-proxy (routes to backend/AI internally)
+        location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy) {
+            proxy_pass http://192.168.49.2:30085;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
         }
 
         location /wd/hub {
@@ -190,7 +183,7 @@ server_name localhost;
         }
 
         location / {
-            proxy_pass http://192.168.49.2:30085;
+            proxy_pass http://192.168.49.2:30173;
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
