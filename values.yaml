@@ -34,7 +34,7 @@ postgresql:
 imitator:
   name: hlm-selector-imitator
   repository: healenium/hlm-selector-imitator
-  tag: 1.4
+  tag: 1.6
   port: 8000
   resources:
     requests:
@@ -45,7 +45,6 @@ imitator:
       memory: 512Mi
 
 hlmproxy:
-  # IF YOU USE HLM-WEB FOR JAVA TESTS SET ENABLE TO false
   enable: true
   name: hlm-proxy
   repository: aliakseiashukha/hlm-proxy
