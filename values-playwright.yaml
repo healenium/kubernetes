@@ -152,7 +152,7 @@ playwrightServer:
   # Set customDNS: true to override cluster DNS (useful for ISP DNS hijacking)
   # For AWS: set customDNS: false to use cluster/VPC DNS (faster, optimized)
   customDNS:
-    enabled: true
+    enabled: false
     nameservers:
       - 8.8.8.8      # Google DNS
       - 1.1.1.1      # Cloudflare DNS
