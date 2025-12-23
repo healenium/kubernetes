@@ -165,8 +165,9 @@ server_name localhost;
         ssl_certificate /etc/nginx/ssl/selfsigned.crt;
         ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
 
-        # API routes → hlm-proxy (routes to backend/AI internally)
-        location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy) {
+        # API routes → hlm-proxy (Spring Cloud Gateway routes to backend/AI/Playwright internally)
+        # Routes: /healenium/** → hlm-backend, /healenium-ai/** → hlm-ai, /hlm-playwright-proxy/** → playwright-proxy
+        location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy|hlm-playwright-proxy) {
             proxy_pass http://192.168.49.2:30085;
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
@@ -174,14 +175,7 @@ server_name localhost;
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
-        location /wd/hub {
-            proxy_pass http://192.168.49.2:30085;
-            proxy_set_header Host $http_host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
+        # UI Dashboard
         location / {
             proxy_pass http://192.168.49.2:30173;
             proxy_set_header Host $http_host;
