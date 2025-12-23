@@ -153,6 +153,13 @@ sudo mkdir -p /etc/nginx/sites-enabled
 CONFIG_FILE="/etc/nginx/sites-available/default"
 
 sudo tee "$CONFIG_FILE" > /dev/null <<'EOF'
+# Map directive for WebSocket connection upgrade handling
+# Allows same location block to handle both HTTP and WebSocket connections
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
 server {
 
 server_name localhost;
@@ -167,12 +174,25 @@ server_name localhost;
 
         # API routes → hlm-proxy (Spring Cloud Gateway routes to backend/AI/Playwright internally)
         # Routes: /healenium/** → hlm-backend, /healenium-ai/** → hlm-ai, /hlm-playwright-proxy/** → playwright-proxy
+        # Supports both HTTP and WebSocket connections
         location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy|hlm-playwright-proxy) {
             proxy_pass http://192.168.49.2:30085;
+            
+            # WebSocket support - required for hlm-playwright-proxy WebSocket connections
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            
+            # Standard proxy headers
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # WebSocket-specific timeouts (long-lived connections)
+            proxy_read_timeout 86400s;  # 24 hours for WebSocket connections
+            proxy_send_timeout 86400s;
+            proxy_connect_timeout 60s;
         }
 
         # UI Dashboard
