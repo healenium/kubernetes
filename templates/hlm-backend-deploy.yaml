@@ -18,6 +18,7 @@ spec:
       containers:
         - name: hlm-backend
           image: "{{ .Values.hlmbackend.repository }}:{{ .Values.hlmbackend.tag }}"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: {{ .Values.hlmbackend.port }}
               protocol: TCP

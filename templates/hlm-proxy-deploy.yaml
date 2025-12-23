@@ -19,6 +19,7 @@ spec:
       containers:
         - name: hlm-proxy
           image: "{{ .Values.hlmproxy.repository }}:{{ .Values.hlmproxy.tag }}"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: {{ .Values.hlmproxy.port }}
               protocol: TCP
@@ -39,6 +40,8 @@ spec:
               value: "http://{{ .Values.imitator.name }}:{{ .Values.imitator.port }}"
             - name: HEALENIUM_AI_SERVICE
               value: "http://{{ .Values.hlmai.name }}:{{ .Values.hlmai.port }}"
+            - name: PLAYWRIGHT_PROXY_SERVICE
+              value: "http://{{ .Values.playwrightProxy.name }}:{{ .Values.playwrightProxy.port }}"
             - name: HLM_LOG_LEVEL
               value: {{ .Values.hlmproxy.environment.hlm_log_level }}
           volumeMounts:

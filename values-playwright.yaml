@@ -1,0 +1,165 @@
+# =============================================================================
+# HEALENIUM PLAYWRIGHT PROXY - CUSTOM VALUES
+# =============================================================================
+# Use this file for Playwright-based self-healing setup:
+#   helm install healenium . -f values-playwright.yaml
+# =============================================================================
+
+# =============================================================================
+# HEALENIUM BACKEND
+# =============================================================================
+hlmbackend:
+  name: hlm-backend
+  repository: aliakseiashukha/hlm-backend
+  tag: 3.5.0
+  pullPolicy: IfNotPresent
+  port: 7878
+  address: http://localhost:7878
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1024Mi
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+  environment:
+    key_selector_url: false
+    collect_metrics: true
+    find_elements_auto_healing: false
+    hlm_log_level: debug
+  screenshotsPvClaimName: "screenshots-pvc"
+  logsPvClaimName: "hlm-backend-logs-pvc"
+
+postgresql:
+  installdep:
+    enable: false
+  endpoint:
+    address: db-postgresql
+    port: 5432
+    user: healenium_user
+    dbName: healenium
+    schema: healenium
+
+imitator:
+  name: hlm-selector-imitator
+  repository: healenium/hlm-selector-imitator
+  tag: 1.6
+  pullPolicy: IfNotPresent
+  port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# =============================================================================
+# SELENIUM PROXY (Also enabled for API gateway functionality)
+# =============================================================================
+hlmproxy:
+  enable: true
+  name: hlm-proxy
+  repository: aliakseiashukha/hlm-proxy
+  tag: 2.2.0
+  pullPolicy: IfNotPresent
+  port: 8085
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+  environment:
+    selenium_server_url: http://selenium-grid-selenium-hub.default.svc:4444/wd/hub
+    hlm_log_level: debug
+  healing:
+    healenabled: true
+    recoverytries: 1
+    scorecap: .6
+  logsPvClaimName: "hlm-proxy-logs-pvc"
+
+# =============================================================================
+# ADMIN DASHBOARD and AI integration
+# =============================================================================
+hlmui:
+  name: hlm-ui-dashboard
+  repository: alaerof/hlm-ui-dashboard
+  tag: 1.2.0
+  pullPolicy: IfNotPresent
+  port: 5173
+  address: http://localhost:5173
+  resources:
+    requests:
+      cpu: 200m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# AI Service: AI-powered PR
+hlmai:
+  name: hlm-ai
+  repository: aliakseiashukha/healenium-ai
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+  port: 6565
+  address: http://localhost:6565
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  logsPvClaimName: "hlm-ai-logs-pvc"
+
+# =============================================================================
+# PLAYWRIGHT PROXY COMPONENTS
+# =============================================================================
+# Playwright Proxy: Main proxy for Playwright browser automation with healing
+playwrightProxy:
+  enable: true
+  name: hlm-playwright-proxy
+  repository: alaerof/hlm-playwright-proxy
+  pullPolicy: IfNotPresent
+  tag: 1.0.0
+  port: 8095
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+  environment:
+    loggingLevel: INFO
+    loggingFilePath: /logs
+    nodePathShortcut: true
+    healingScreenshot: true
+    healingHighlight: true
+  logsPvClaimName: "hlm-playwright-proxy-logs-pvc"
+
+# Playwright Server: Node.js with Playwright for browser automation
+playwrightServer:
+  name: playwright-server
+  repository: alaerof/playwright-server
+  tag: "1.55.1"
+  pullPolicy: IfNotPresent
+  port: 5000
+  # DNS configuration
+  # Set customDNS: true to override cluster DNS (useful for ISP DNS hijacking)
+  # For AWS: set customDNS: false to use cluster/VPC DNS (faster, optimized)
+  customDNS:
+    enabled: true
+    nameservers:
+      - 8.8.8.8      # Google DNS
+      - 1.1.1.1      # Cloudflare DNS
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1024Mi
+    limits:
+      cpu: 2000m
+      memory: 4096Mi

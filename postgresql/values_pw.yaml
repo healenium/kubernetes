@@ -1,0 +1,30 @@
+global:
+  storageClass: standard
+  postgresql:
+    auth:
+      username: "healenium_user"
+      existingSecret: hlm-secret
+      secretKeys:
+        adminPasswordKey: adminPassword
+        userPasswordKey: userPassword
+
+primary:
+  # Removed extraEnvVars - POSTGRES_USER and POSTGRES_DB are set automatically by chart
+  # from global.postgresql.auth.username and global.postgresql.auth.database
+  initdb:
+    scripts:
+      init_postgres.sh: |
+        #!/bin/bash
+        set -e
+        echo "Creating schema..."
+        export PGPASSWORD="${POSTGRES_PASSWORD}"
+        psql -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE} -c "CREATE SCHEMA IF NOT EXISTS healenium AUTHORIZATION healenium_user;"
+        echo "Checking if schema created..."
+        psql -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE} -c "\dn"
+
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accessModes:
+    - ReadWriteOnce
+  size: "8Gi"

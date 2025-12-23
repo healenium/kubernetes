@@ -1,9 +1,33 @@
-apiVersion: v1
-appVersion: "0.1.0"
+apiVersion: v2
+appVersion: "0.2.0"
 name: healenium
-description: Healenium Helm chart for Kubernetes
-version: 2.1.1
+description: Healenium Helm chart for Kubernetes - Self-healing test automation framework (Selenium & Playwright)
+version: 2.2.0
+type: application
+home: https://healenium.io
+icon: https://healenium.io/favicon.ico
 sources:
   - https://github.com/healenium/kubernetes
+  - https://github.com/healenium/healenium
+maintainers:
+  - name: Healenium Team
+    url: https://github.com/healenium
 keywords:
   - healenium
+  - selenium
+  - playwright
+  - testing
+  - test-automation
+  - self-healing
+  - qa
+  - automation
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/category: testing
+# Migrated dependencies to Chart.yaml per Helm v2 recommendation
+# Dependencies commented out - PostgreSQL is installed separately via OCI registry
+# dependencies:
+#   - name: postgresql
+#     version: 11.6.2
+#     repository: https://charts.bitnami.com/bitnami
+#     condition: postgresql.installdep.enable

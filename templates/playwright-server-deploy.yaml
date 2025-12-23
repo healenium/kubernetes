@@ -1,0 +1,66 @@
+{{- if .Values.playwrightProxy.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.playwrightServer.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.playwrightServer.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: {{ .Values.playwrightServer.name }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.playwrightServer.name }}
+    spec:
+      {{- if .Values.playwrightServer.customDNS.enabled }}
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          {{- range .Values.playwrightServer.customDNS.nameservers }}
+          - {{ . }}
+          {{- end }}
+        searches:
+          - default.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+      {{- end }}
+      containers:
+        - name: playwright-server
+          image: "{{ .Values.playwrightServer.repository }}:{{ .Values.playwrightServer.tag }}"
+          imagePullPolicy: IfNotPresent
+          command: ["npx", "playwright", "run-server", "--host", "0.0.0.0", "--port", "{{ .Values.playwrightServer.port }}"]
+          env:
+            # Chromium args to ignore SSL certificate errors (corporate proxy SSL interception)
+            - name: PLAYWRIGHT_CHROMIUM_ARGS
+              value: "--ignore-certificate-errors --ignore-ssl-errors --allow-insecure-localhost"
+          ports:
+            - name: ws
+              containerPort: {{ .Values.playwrightServer.port }}
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: ws
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: ws
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: {{ .Values.playwrightServer.resources.requests.cpu }}
+              memory: {{ .Values.playwrightServer.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.playwrightServer.resources.limits.cpu }}
+              memory: {{ .Values.playwrightServer.resources.limits.memory }}
+{{- end }}
+

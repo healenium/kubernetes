@@ -18,6 +18,7 @@ spec:
       containers:
         - name: hlm-ui
           image: "{{ .Values.hlmui.repository }}:{{ .Values.hlmui.tag }}"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: {{ .Values.hlmui.port }}
               protocol: TCP

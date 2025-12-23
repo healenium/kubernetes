@@ -136,7 +136,6 @@ sudo -u "$FIRST_USER" helm install db oci://registry-1.docker.io/bitnamicharts/p
   --set global.postgresql.auth.database=healenium
 # Install Healenium 
 sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR"
-sudo -u "$FIRST_USER" helm install selenium-grid docker-selenium/selenium-grid
 
 log "Enabling minikube service"
 enable_minikube_service

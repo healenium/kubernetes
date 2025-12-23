@@ -1,0 +1,77 @@
+{{- if .Values.playwrightProxy.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.playwrightProxy.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.playwrightProxy.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: {{ .Values.playwrightProxy.name }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.playwrightProxy.name }}
+    spec:
+      containers:
+        - name: hlm-playwright-proxy
+          image: "{{ .Values.playwrightProxy.repository }}:{{ .Values.playwrightProxy.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http-ws
+              containerPort: {{ .Values.playwrightProxy.port }}
+              protocol: TCP
+          env:
+            - name: LOGGING_LEVEL_COM_EPAM_HEALENIUM
+              value: {{ .Values.playwrightProxy.environment.loggingLevel }}
+            - name: LOGGING_FILE_PATH
+              value: {{ .Values.playwrightProxy.environment.loggingFilePath }}
+            - name: HEALENIUM_SERVER_URL
+              value: "http://{{ .Values.hlmbackend.name }}:{{ .Values.hlmbackend.port }}"
+            - name: HEALENIUM_PLAYWRIGHT_PROXY_REMOTE_SERVER_URL
+              value: "ws://{{ .Values.playwrightServer.name }}:{{ .Values.playwrightServer.port }}"
+            - name: HEALENIUM_PLAYWRIGHT_PROXY_NODEPATH_SHORTCUT
+              value: "{{ .Values.playwrightProxy.environment.nodePathShortcut }}"
+            - name: HEALENIUM_PLAYWRIGHT_PROXY_HEALING_SCREENSHOT
+              value: "{{ .Values.playwrightProxy.environment.healingScreenshot }}"
+            - name: HEALENIUM_PLAYWRIGHT_PROXY_HEALING_HIGHLIGHT
+              value: "{{ .Values.playwrightProxy.environment.healingHighlight }}"
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /logs
+            - name: discovery-assets
+              mountPath: /discoveryAssets
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http-ws
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http-ws
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: {{ .Values.playwrightProxy.resources.requests.cpu }}
+              memory: {{ .Values.playwrightProxy.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.playwrightProxy.resources.limits.cpu }}
+              memory: {{ .Values.playwrightProxy.resources.limits.memory }}
+      volumes:
+        - name: discovery-assets
+          emptyDir: {}
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.playwrightProxy.logsPvClaimName }}
+{{- end }}
+
