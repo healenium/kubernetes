@@ -126,16 +126,13 @@ EOF
 log "Installing Helm charts from $SCRIPT_DIR"
 cd "$SCRIPT_DIR"
 sudo chown -R "$FIRST_USER:$FIRST_USER" "$SCRIPT_DIR"
-# Add docker-selenium repo (Bitnami repo skipped - using OCI registry instead)
-sudo -u "$FIRST_USER" helm repo add docker-selenium https://www.selenium.dev/docker-selenium
-sudo -u "$FIRST_USER" helm repo update
 # Install PostgreSQL from OCI registry (Bitnami repo blocked, using OCI instead)
 sudo -u "$FIRST_USER" helm install db oci://registry-1.docker.io/bitnamicharts/postgresql \
   -f "$SCRIPT_DIR/postgresql/values_pw.yaml" \
   --set global.postgresql.auth.postgresPassword=$ADMIN_PASS \
   --set global.postgresql.auth.database=healenium
-# Install Healenium 
-sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR"
+# Install Healenium with Playwright values
+sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR" -f "$SCRIPT_DIR/values-playwright.yaml"
 
 log "Enabling minikube service"
 enable_minikube_service
