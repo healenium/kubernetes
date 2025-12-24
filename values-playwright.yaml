@@ -134,6 +134,7 @@ playwrightProxy:
       cpu: 1000m
       memory: 1024Mi
   environment:
+    managementBasePath: "/hlm-playwright-proxy/actuator"
     loggingLevel: INFO
     loggingFilePath: /logs
     nodePathShortcut: true

@@ -39,6 +39,8 @@ spec:
               value: "{{ .Values.playwrightProxy.environment.healingScreenshot }}"
             - name: HEALENIUM_PLAYWRIGHT_PROXY_HEALING_HIGHLIGHT
               value: "{{ .Values.playwrightProxy.environment.healingHighlight }}"
+            - name: MANAGEMENT_ENDPOINTS_WEB_BASE_PATH
+              value: {{ .Values.playwrightProxy.environment.managementBasePath | default "/actuator" | quote }}
           volumeMounts:
             - name: logs-volume
               mountPath: /logs
@@ -46,7 +48,7 @@ spec:
               mountPath: /discoveryAssets
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: {{ .Values.playwrightProxy.environment.managementBasePath | default "/actuator" }}/health
               port: http-ws
             initialDelaySeconds: 60
             periodSeconds: 30
@@ -54,7 +56,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: {{ .Values.playwrightProxy.environment.managementBasePath | default "/actuator" }}/health
               port: http-ws
             initialDelaySeconds: 30
             periodSeconds: 10
