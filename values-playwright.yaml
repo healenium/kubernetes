@@ -60,8 +60,8 @@ imitator:
 hlmproxy:
   enable: true
   name: hlm-proxy
-  repository: aliakseiashukha/hlm-proxy
-  tag: 2.2.0
+  repository: alaerof/hlm-proxy
+  tag: 2.2.1  
   pullPolicy: IfNotPresent
   port: 8085
   resources:

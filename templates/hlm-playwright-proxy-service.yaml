@@ -7,11 +7,12 @@ metadata:
     app: {{ include "healenium.fullname" . }}
     component: {{ .Values.playwrightProxy.name }}
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
     - name: headless
       port: {{ .Values.playwrightProxy.port }}
       targetPort: http-ws
+      nodePort: 30095
       protocol: TCP
   selector:
     component: {{ .Values.playwrightProxy.name }}
