@@ -178,20 +178,20 @@ server_name localhost;
         location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy|hlm-playwright-proxy) {
             proxy_pass http://192.168.49.2:30085;
             
-            # WebSocket support - required for hlm-playwright-proxy WebSocket connections
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection $connection_upgrade;
-            
             # Standard proxy headers
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
             
-            # WebSocket-specific timeouts (long-lived connections)
-            proxy_read_timeout 86400s;  # 24 hours for WebSocket connections
-            proxy_send_timeout 86400s;
+            # WebSocket support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            # long-lived connections: 30 minutes
+            proxy_read_timeout 1800s;  
+            proxy_send_timeout 1800s;
+            # connection establishment
             proxy_connect_timeout 60s;
         }
 
