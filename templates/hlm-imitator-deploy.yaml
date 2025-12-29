@@ -18,7 +18,7 @@ spec:
       containers:
         - name: {{ .Values.imitator.name }}
           image: "{{ .Values.imitator.repository }}:{{ .Values.imitator.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.imitator.pullPolicy }}
           ports:
             - containerPort: {{ .Values.imitator.port }}
               protocol: TCP

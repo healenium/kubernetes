@@ -36,6 +36,7 @@ imitator:
   repository: healenium/hlm-selector-imitator
   tag: 1.6
   port: 8000
+  pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 100m
@@ -50,6 +51,7 @@ hlmproxy:
   repository: aliakseiashukha/hlm-proxy
   tag: 2.2.0
   port: 8085
+  pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 200m

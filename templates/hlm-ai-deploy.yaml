@@ -18,7 +18,7 @@ spec:
       containers:
         - name: hlm-proxy
           image: "{{ .Values.hlmai.repository }}:{{ .Values.hlmai.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.hlmai.pullPolicy }}
           ports:
             - containerPort: {{ .Values.hlmai.port }}
               protocol: TCP

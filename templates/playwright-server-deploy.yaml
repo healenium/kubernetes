@@ -31,7 +31,7 @@ spec:
       containers:
         - name: playwright-server
           image: "{{ .Values.playwrightServer.repository }}:{{ .Values.playwrightServer.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.playwrightServer.pullPolicy }}
           command: ["npx", "playwright", "run-server", "--host", "0.0.0.0", "--port", "{{ .Values.playwrightServer.port }}"]
           env:
             # Chromium args to ignore SSL certificate errors (corporate proxy SSL interception)
