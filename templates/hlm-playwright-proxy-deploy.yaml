@@ -46,7 +46,7 @@ spec:
               mountPath: /discoveryAssets
           livenessProbe:
             httpGet:
-              path: /hlm-playwright-proxy/actuator/health
+              path: /actuator/health
               port: http-ws
             initialDelaySeconds: 60
             periodSeconds: 30
@@ -54,7 +54,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /hlm-playwright-proxy/actuator/health
+              path: /actuator/health
               port: http-ws
             initialDelaySeconds: 30
             periodSeconds: 10
