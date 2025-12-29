@@ -1,0 +1,19 @@
+{{- if .Values.playwrightProxy.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.playwrightServer.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.playwrightServer.name }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: headless
+      port: {{ .Values.playwrightServer.port }}
+      targetPort: ws
+      protocol: TCP
+  selector:
+    component: {{ .Values.playwrightServer.name }}
+{{- end }}
+

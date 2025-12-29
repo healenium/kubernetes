@@ -1,0 +1,20 @@
+{{- if .Values.playwrightProxy.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.playwrightProxy.name }}
+  labels:
+    app: {{ include "healenium.fullname" . }}
+    component: {{ .Values.playwrightProxy.name }}
+spec:
+  type: NodePort
+  ports:
+    - name: headless
+      port: {{ .Values.playwrightProxy.port }}
+      targetPort: http-ws
+      nodePort: 30095
+      protocol: TCP
+  selector:
+    component: {{ .Values.playwrightProxy.name }}
+{{- end }}
+

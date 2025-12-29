@@ -126,17 +126,13 @@ EOF
 log "Installing Helm charts from $SCRIPT_DIR"
 cd "$SCRIPT_DIR"
 sudo chown -R "$FIRST_USER:$FIRST_USER" "$SCRIPT_DIR"
-# Add docker-selenium repo (Bitnami repo skipped - using OCI registry instead)
-sudo -u "$FIRST_USER" helm repo add docker-selenium https://www.selenium.dev/docker-selenium
-sudo -u "$FIRST_USER" helm repo update
 # Install PostgreSQL from OCI registry (Bitnami repo blocked, using OCI instead)
 sudo -u "$FIRST_USER" helm install db oci://registry-1.docker.io/bitnamicharts/postgresql \
   -f "$SCRIPT_DIR/postgresql/values_pw.yaml" \
   --set global.postgresql.auth.postgresPassword=$ADMIN_PASS \
   --set global.postgresql.auth.database=healenium
-# Install Healenium 
-sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR"
-sudo -u "$FIRST_USER" helm install selenium-grid docker-selenium/selenium-grid
+# Install Healenium with Playwright values
+sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR" -f "$SCRIPT_DIR/values-playwright.yaml"
 
 log "Enabling minikube service"
 enable_minikube_service
@@ -157,6 +153,13 @@ sudo mkdir -p /etc/nginx/sites-enabled
 CONFIG_FILE="/etc/nginx/sites-available/default"
 
 sudo tee "$CONFIG_FILE" > /dev/null <<'EOF'
+# Map directive for WebSocket connection upgrade handling
+# Allows same location block to handle both HTTP and WebSocket connections
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
 server {
 
 server_name localhost;
@@ -169,23 +172,30 @@ server_name localhost;
         ssl_certificate /etc/nginx/ssl/selfsigned.crt;
         ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
 
-        # API routes → hlm-proxy (routes to backend/AI internally)
-        location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy) {
+        # API routes → hlm-proxy (Spring Cloud Gateway routes to backend/AI/Playwright internally)
+        # Routes: /healenium/** → hlm-backend, /healenium-ai/** → hlm-ai, /hlm-playwright-proxy/** → playwright-proxy
+        # Supports both HTTP and WebSocket connections
+        location ~ ^/(healenium|screenshots|healenium-ai|hlm-proxy|hlm-playwright-proxy) {
             proxy_pass http://192.168.49.2:30085;
+            
+            # Standard proxy headers
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # WebSocket support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            # long-lived connections: 30 minutes
+            proxy_read_timeout 1800s;  
+            proxy_send_timeout 1800s;
+            # connection establishment
+            proxy_connect_timeout 60s;
         }
 
-        location /wd/hub {
-            proxy_pass http://192.168.49.2:30085;
-            proxy_set_header Host $http_host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
+        # UI Dashboard
         location / {
             proxy_pass http://192.168.49.2:30173;
             proxy_set_header Host $http_host;

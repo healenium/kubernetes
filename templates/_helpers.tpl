@@ -60,3 +60,21 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Component labels - for individual components
+Usage: {{ include "healenium.componentLabels" (dict "ctx" . "component" "backend") }}
+*/}}
+{{- define "healenium.componentLabels" -}}
+{{ include "healenium.labels" .ctx }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
+
+{{/*
+Component selector labels - for service selectors
+Usage: {{ include "healenium.componentSelectorLabels" (dict "ctx" . "component" "backend") }}
+*/}}
+{{- define "healenium.componentSelectorLabels" -}}
+{{ include "healenium.selectorLabels" .ctx }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
