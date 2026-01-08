@@ -202,4 +202,28 @@ log "NGINX has been reloaded with the new configuration."
 
 log "Cleaning apt cache"
 sudo apt clean
-log 'Done. Healenium installation complete!'
+
+# Remove authorized_keys from all locations
+sudo rm -f /home/ubuntu/.ssh/authorized_keys
+sudo rm -f /root/.ssh/authorized_keys
+sudo find /var/lib/containerd -name "authorized_keys" -delete 2>/dev/null || true
+
+# Remove SSH host keys (will be regenerated on first boot)
+sudo rm -f /etc/ssh/ssh_host_*
+
+# Clear cloud-init state for fresh initialization
+sudo rm -rf /var/lib/cloud/instances/*
+sudo rm -rf /var/lib/cloud/instance
+
+# Clear logs and temp files
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+sudo journalctl --vacuum-time=1d 2>/dev/null || true
+
+# Clear bash history
+rm -f /home/ubuntu/.bash_history
+rm -f /root/.bash_history
+history -c 2>/dev/null || true
+
+log 'Done. Healenium installation complete! Ready for AMI creation.'
+log 'IMPORTANT: After creating AMI, you will need a new EC2 Key Pair to SSH into instances launched from this AMI.'
