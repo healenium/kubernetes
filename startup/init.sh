@@ -211,10 +211,6 @@ sudo find /var/lib/containerd -name "authorized_keys" -delete 2>/dev/null || tru
 # Remove SSH host keys (will be regenerated on first boot)
 sudo rm -f /etc/ssh/ssh_host_*
 
-# Clear cloud-init state for fresh initialization
-sudo rm -rf /var/lib/cloud/instances/*
-sudo rm -rf /var/lib/cloud/instance
-
 # Clear logs and temp files
 sudo rm -rf /tmp/*
 sudo rm -rf /var/tmp/*
