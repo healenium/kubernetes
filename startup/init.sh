@@ -204,9 +204,9 @@ log "Cleaning apt cache"
 sudo apt clean
 
 # Remove authorized_keys from all locations
-sudo rm -f /home/ubuntu/.ssh/authorized_keys
-sudo rm -f /root/.ssh/authorized_keys
-sudo find /var/lib/containerd -name "authorized_keys" -delete 2>/dev/null || true
+#sudo rm -f /home/ubuntu/.ssh/authorized_keys
+#sudo rm -f /root/.ssh/authorized_keys
+#sudo find /var/lib/containerd -name "authorized_keys" -delete 2>/dev/null || true
 
 ## Remove SSH host keys (will be regenerated on first boot)
 #sudo rm -f /etc/ssh/ssh_host_*
