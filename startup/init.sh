@@ -93,9 +93,27 @@ sudo dpkg -i minikube_latest_$(dpkg --print-architecture).deb && rm minikube_lat
 
 # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux
 log "Installing kubectl"
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(dpkg --print-architecture)/kubectl"  # todo specify concrete release
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(dpkg --print-architecture)/kubectl.sha256"
-echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check || exit 1
+# Get kubectl version first
+KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+if [ -z "$KUBECTL_VERSION" ]; then
+  log_err "Failed to get kubectl version. Exiting."
+  exit 1
+fi
+log "Installing kubectl version: $KUBECTL_VERSION"
+
+# Map architecture: dpkg uses 'amd64', Kubernetes uses 'amd64' (same, but ensure consistency)
+ARCH=$(dpkg --print-architecture)
+# Kubernetes uses 'amd64' for x86_64, keep as is
+KUBECTL_ARCH="$ARCH"
+
+KUBECTL_URL="https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KUBECTL_ARCH}/kubectl"
+SHA256_URL="https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KUBECTL_ARCH}/kubectl.sha256"
+
+log "Downloading kubectl from: $KUBECTL_URL"
+curl -LO "$KUBECTL_URL" || { log_err "Failed to download kubectl. Exiting."; exit 1; }
+curl -LO "$SHA256_URL" || { log_err "Failed to download kubectl.sha256. Exiting."; exit 1; }
+
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check || { log_err "kubectl checksum verification failed. Exiting."; exit 1; }
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl kubectl.sha256
 
 
