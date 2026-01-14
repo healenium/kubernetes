@@ -221,5 +221,5 @@ sudo apt clean
 #rm -f /root/.bash_history
 #history -c 2>/dev/null || true
 
-log 'Done. Healenium installation complete! Ready for AMI creation.'
-log 'IMPORTANT: After creating AMI, you will need a new EC2 Key Pair to SSH into instances launched from this AMI.'
+#log 'Done. Healenium installation complete! Ready for AMI creation.'
+#log 'IMPORTANT: After creating AMI, you will need a new EC2 Key Pair to SSH into instances launched from this AMI.'
