@@ -39,12 +39,16 @@ generate_password() {
 }
 
 enable_minikube_service() {
+  # Create log directory
+  sudo mkdir -p /var/log/healenium
+  sudo chown $FIRST_USER:$FIRST_USER /var/log/healenium
+  
   # Create startup script that will be run by systemd
   sudo tee /usr/local/bin/start-healenium.sh <<'EOF' > /dev/null
 #!/bin/bash
 set -e
 
-log() { echo "[INFO] $(date) $1" | tee -a /var/log/healenium-startup.log; }
+log() { echo "[INFO] $(date) $1"; }
 
 log "Starting Healenium system..."
 
