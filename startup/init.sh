@@ -39,18 +39,89 @@ generate_password() {
 }
 
 enable_minikube_service() {
+  # Create startup script that will be run by systemd
+  sudo tee /usr/local/bin/start-healenium.sh <<'EOF' > /dev/null
+#!/bin/bash
+set -e
+
+log() { echo "[INFO] $(date) $1" | tee -a /var/log/healenium-startup.log; }
+
+log "Starting Healenium system..."
+
+# Chart directory (copied during init.sh)
+CHART_DIR="/opt/healenium/charts"
+if [ ! -f "$CHART_DIR/Chart.yaml" ]; then
+  log "ERROR: Chart.yaml not found at $CHART_DIR"
+  log "Run init.sh first to prepare the AMI"
+  exit 1
+fi
+
+# Start minikube
+log "Starting minikube..."
+TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
+MINIKUBE_MEM=$(( TOTAL_MEM * 80 / 100 ))
+log "Allocating ${MINIKUBE_MEM}MB to minikube"
+
+minikube start --driver=docker --container-runtime=containerd -n 1 --force --interactive=false --memory=${MINIKUBE_MEM}m --cpus=max
+
+# Wait for minikube to be ready
+log "Waiting for minikube to be ready..."
+kubectl wait --for=condition=Ready nodes --all --timeout=300s || true
+
+# Generate passwords
+ADMIN_PASS=$(openssl rand -base64 20)
+USER_PASS=$(openssl rand -base64 20)
+
+log "Creating Kubernetes secret with passwords..."
+kubectl create secret generic hlm-secret \
+  --from-literal=adminPassword=$ADMIN_PASS \
+  --from-literal=userPassword=$USER_PASS \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# Check if helm releases already exist
+if helm list 2>/dev/null | grep -q healenium; then
+  log "Healenium already installed, skipping helm install"
+else
+  log "Installing Helm charts from $CHART_DIR..."
+  
+  # Helm repos should already be configured, but update just in case
+  helm repo update 2>/dev/null || true
+  
+  # Install charts
+  log "Installing PostgreSQL..."
+  helm install db bitnami/postgresql -f "$CHART_DIR/postgresql/values.yaml"
+  
+  log "Installing Healenium..."
+  helm install healenium "$CHART_DIR"
+  
+  log "Installing Selenium Grid..."
+  helm install selenium-grid docker-selenium/selenium-grid
+fi
+
+log "Healenium startup complete!"
+log "Admin password: $ADMIN_PASS"
+log "User password: $USER_PASS"
+log "Passwords are stored in Kubernetes secret 'hlm-secret'"
+
+EOF
+
+  sudo chmod +x /usr/local/bin/start-healenium.sh
+  
+  # Create systemd service
   sudo tee /etc/systemd/system/rule-engine-minikube.service <<EOF > /dev/null
 [Unit]
-Description=Rule engine minikube start up
-After=docker.service
+Description=Healenium minikube and services startup
+After=docker.service network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/minikube start --force --interactive=false
+ExecStart=/usr/local/bin/start-healenium.sh
 ExecStop=/usr/bin/minikube stop
 User=$FIRST_USER
 Group=$FIRST_USER
 RemainAfterExit=yes
+TimeoutStartSec=600
 
 [Install]
 WantedBy=multi-user.target
@@ -126,35 +197,24 @@ log "Installing helm via official script (more reliable than apt)"
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 
-log "Starting minikube on behalf of $FIRST_USER"
-ADMIN_PASS=$(generate_password)
-USER_PASS=$(generate_password)
+# Copy charts to standard location for AMI
+log "Copying Helm charts to /opt/healenium/"
+sudo mkdir -p /opt/healenium
+sudo cp -r "$SCRIPT_DIR" /opt/healenium/charts
+sudo chown -R "$FIRST_USER:$FIRST_USER" /opt/healenium
 
-sudo -u "$FIRST_USER" bash <<EOF
-echo "Starting minikube..."
-# Start with 80% of available memory to leave room for system overhead
-TOTAL_MEM=\$(free -m | awk '/^Mem:/{print \$2}')
-MINIKUBE_MEM=\$(( TOTAL_MEM * 80 / 100 ))
-echo "Allocating \${MINIKUBE_MEM}MB to minikube (80% of \${TOTAL_MEM}MB total)"
-minikube start --driver=docker --container-runtime=containerd -n 1 --force --interactive=false --memory=\${MINIKUBE_MEM}m --cpus=max
-# Create secret (ignore if exists)
-kubectl create secret generic hlm-secret \
-  --from-literal=adminPassword=$ADMIN_PASS \
-  --from-literal=userPassword=$USER_PASS \
-  --dry-run=client -o yaml | kubectl apply -f -
+# Prepare Helm repos (as FIRST_USER)
+log "Configuring Helm repositories"
+sudo -u "$FIRST_USER" bash <<'EOF'
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add docker-selenium https://www.selenium.dev/docker-selenium
+helm repo update
+cd /opt/healenium/charts
+helm dependency build
 EOF
 
-# Initialize Bitnami Helm package manager (run as FIRST_USER who has kubeconfig)
-log "Installing Helm charts from $SCRIPT_DIR"
-cd "$SCRIPT_DIR"
-sudo chown -R "$FIRST_USER:$FIRST_USER" "$SCRIPT_DIR"
-sudo -u "$FIRST_USER" helm repo add bitnami https://charts.bitnami.com/bitnami
-sudo -u "$FIRST_USER" helm repo add docker-selenium https://www.selenium.dev/docker-selenium
-sudo -u "$FIRST_USER" helm repo update
-sudo -u "$FIRST_USER" helm dependency build "$SCRIPT_DIR"
-sudo -u "$FIRST_USER" helm install db bitnami/postgresql -f "$SCRIPT_DIR/postgresql/values.yaml"
-sudo -u "$FIRST_USER" helm install healenium "$SCRIPT_DIR"
-sudo -u "$FIRST_USER" helm install selenium-grid docker-selenium/selenium-grid
+log "Helm charts prepared in /opt/healenium/charts/"
+log "NOTE: Minikube and services will start automatically on first boot via systemd"
 
 log "Enabling minikube service"
 enable_minikube_service
@@ -226,23 +286,28 @@ log "Cleaning apt cache"
 sudo apt clean
 
 log "=========================================="
-log "Healenium installation complete!"
+log "Healenium AMI preparation complete!"
 log "=========================================="
 log ""
-log "System is ready. Access the UI at:"
-log "  - HTTP:  http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo 'YOUR_EC2_IP')"
-log "  - HTTPS: https://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo 'YOUR_EC2_IP')"
-log ""
-log "Admin password: $ADMIN_PASS"
-log "User password:  $USER_PASS"
-log ""
-log "IMPORTANT: Save these passwords! They are stored in Kubernetes secret 'hlm-secret'"
+log "Installed components:"
+log "  ✓ Docker"
+log "  ✓ Minikube"
+log "  ✓ Kubectl"
+log "  ✓ Helm"
+log "  ✓ Nginx"
+log "  ✓ Helm charts copied to /opt/healenium/charts/"
+log "  ✓ Systemd service configured (will start on boot)"
 log ""
 log "=========================================="
-log "TO CREATE AN AMI FOR AWS MARKETPLACE:"
+log "NEXT STEPS FOR AMI CREATION:"
 log "=========================================="
-log "1. Test the system thoroughly"
+log "1. (Optional) Test: sudo systemctl start rule-engine-minikube.service"
 log "2. Run: sudo bash $(dirname "$0")/prepare-ami.sh"
-log "3. Create AMI immediately after prepare-ami.sh completes"
-log "4. DO NOT ssh back into the instance after running prepare-ami.sh"
+log "3. Create AMI: aws ec2 create-image --instance-id i-xxx --name healenium --no-reboot"
+log "4. Terminate this instance after AMI creation"
+log ""
+log "When new instances launch from the AMI:"
+log "  - Minikube will start automatically (2-3 minutes)"
+log "  - All services will be deployed automatically"
+log "  - UI will be available at http://INSTANCE_IP"
 log ""

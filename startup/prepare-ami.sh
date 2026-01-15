@@ -19,11 +19,10 @@ else
   FIRST_USER=$(whoami)
 fi
 
-log "Stopping minikube gracefully"
-sudo -u "$FIRST_USER" minikube stop || log_err "Failed to stop minikube (may not be running)"
-
-log "Waiting for minikube to fully stop..."
-sleep 10
+log "Cleaning up any existing minikube state (if any)"
+# Remove minikube state if it exists (shouldn't exist if using new init.sh)
+sudo rm -rf /home/$FIRST_USER/.minikube 2>/dev/null || true
+sudo rm -rf /home/$FIRST_USER/.kube 2>/dev/null || true
 
 # Remove authorized_keys from standard locations
 log "Removing authorized keys from home directories"
@@ -78,16 +77,24 @@ log "=========================================="
 log "AMI preparation complete!"
 log "=========================================="
 log ""
-log "NEXT STEPS:"
-log "1. Create AMI from this instance: aws ec2 create-image ..."
-log "2. When launching new instances from this AMI:"
-log "   - SSH host keys will be auto-generated on first boot"
-log "   - You'll need to provide a new EC2 Key Pair"
-log "   - Minikube will start automatically via systemd service"
+log "Cleaned up:"
+log "  ✓ SSH authorized keys removed"
+log "  ✓ SSH host keys removed"
+log "  ✓ Containerd snapshots cleaned"
+log "  ✓ Logs cleared"
+log "  ✓ Bash history cleared"
+log "  ✓ Machine ID reset"
 log ""
-log "IMPORTANT:"
-log "- DO NOT SSH into this instance after running this script"
-log "- Create the AMI immediately"
-log "- Terminate this instance after AMI creation"
+log "Preserved in AMI:"
+log "  ✓ All programs (docker, minikube, kubectl, helm, nginx)"
+log "  ✓ Helm charts in /opt/healenium/charts/"
+log "  ✓ Systemd service configuration"
+log ""
+log "NEXT STEPS:"
+log "1. Create AMI: aws ec2 create-image --instance-id <ID> --name healenium --no-reboot"
+log "2. Terminate this instance after AMI is created"
+log "3. Launch new instances from AMI - they will auto-configure in 2-3 minutes"
+log ""
+log "IMPORTANT: DO NOT ssh back into this instance!"
 log ""
 
