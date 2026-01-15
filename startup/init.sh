@@ -94,7 +94,7 @@ sudo dpkg -i minikube_latest_$(dpkg --print-architecture).deb && rm minikube_lat
 # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux
 log "Installing kubectl"
 # Get kubectl version first
-KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt | tr -d '[:space:]')
 if [ -z "$KUBECTL_VERSION" ]; then
   log_err "Failed to get kubectl version. Exiting."
   exit 1
@@ -103,6 +103,10 @@ log "Installing kubectl version: $KUBECTL_VERSION"
 
 # Map architecture: dpkg uses 'amd64', Kubernetes uses 'amd64' (same, but ensure consistency)
 ARCH=$(dpkg --print-architecture)
+if [ -z "$ARCH" ]; then
+  log_err "Failed to determine system architecture. Exiting."
+  exit 1
+fi
 # Kubernetes uses 'amd64' for x86_64, keep as is
 KUBECTL_ARCH="$ARCH"
 
@@ -110,8 +114,8 @@ KUBECTL_URL="https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KUBECTL_AR
 SHA256_URL="https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KUBECTL_ARCH}/kubectl.sha256"
 
 log "Downloading kubectl from: $KUBECTL_URL"
-curl -LO "$KUBECTL_URL" || { log_err "Failed to download kubectl. Exiting."; exit 1; }
-curl -LO "$SHA256_URL" || { log_err "Failed to download kubectl.sha256. Exiting."; exit 1; }
+curl -L -o kubectl "$KUBECTL_URL" || { log_err "Failed to download kubectl. Exiting."; exit 1; }
+curl -L -o kubectl.sha256 "$SHA256_URL" || { log_err "Failed to download kubectl.sha256. Exiting."; exit 1; }
 
 echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check || { log_err "kubectl checksum verification failed. Exiting."; exit 1; }
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl kubectl.sha256
@@ -221,23 +225,24 @@ log "NGINX has been reloaded with the new configuration."
 log "Cleaning apt cache"
 sudo apt clean
 
-# Remove authorized_keys from all locations
-#sudo rm -f /home/ubuntu/.ssh/authorized_keys
-#sudo rm -f /root/.ssh/authorized_keys
-#sudo find /var/lib/containerd -name "authorized_keys" -delete 2>/dev/null || true
-
-## Remove SSH host keys (will be regenerated on first boot)
-#sudo rm -f /etc/ssh/ssh_host_*
-
-## Clear logs and temp files
-#sudo rm -rf /tmp/*
-#sudo rm -rf /var/tmp/*
-#sudo journalctl --vacuum-time=1d 2>/dev/null || true
-#
-## Clear bash history
-#rm -f /home/ubuntu/.bash_history
-#rm -f /root/.bash_history
-#history -c 2>/dev/null || true
-
-#log 'Done. Healenium installation complete! Ready for AMI creation.'
-#log 'IMPORTANT: After creating AMI, you will need a new EC2 Key Pair to SSH into instances launched from this AMI.'
+log "=========================================="
+log "Healenium installation complete!"
+log "=========================================="
+log ""
+log "System is ready. Access the UI at:"
+log "  - HTTP:  http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo 'YOUR_EC2_IP')"
+log "  - HTTPS: https://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo 'YOUR_EC2_IP')"
+log ""
+log "Admin password: $ADMIN_PASS"
+log "User password:  $USER_PASS"
+log ""
+log "IMPORTANT: Save these passwords! They are stored in Kubernetes secret 'hlm-secret'"
+log ""
+log "=========================================="
+log "TO CREATE AN AMI FOR AWS MARKETPLACE:"
+log "=========================================="
+log "1. Test the system thoroughly"
+log "2. Run: sudo bash $(dirname "$0")/prepare-ami.sh"
+log "3. Create AMI immediately after prepare-ami.sh completes"
+log "4. DO NOT ssh back into the instance after running prepare-ami.sh"
+log ""
