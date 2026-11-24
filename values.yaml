@@ -2,7 +2,7 @@
 hlmbackend:
   name: hlm-backend
   repository: healenium/hlm-backend
-  tag: 3.4.10
+  tag: 4.0.0
   port: 7878
   address: http://localhost:7878
   resources:
@@ -47,7 +47,7 @@ hlmproxy:
   enable: true
   name: hlm-proxy
   repository: healenium/hlm-proxy
-  tag: 2.1.9
+  tag: 2.3.0
   port: 8085
   resources:
     requests:
