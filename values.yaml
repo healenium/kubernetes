@@ -1,8 +1,8 @@
 
 hlmbackend:
   name: hlm-backend
-  repository: aliakseiashukha/hlm-backend
-  tag: 3.5.0
+  repository: healenium/hlm-backend
+  tag: 4.0.0
   port: 7878
   address: http://localhost:7878
   pullPolicy: IfNotPresent
@@ -47,8 +47,8 @@ imitator:
 hlmproxy:
   enable: true
   name: hlm-proxy
-  repository: aliakseiashukha/hlm-proxy
-  tag: 2.2.0
+  repository: healenium/hlm-proxy
+  tag: 2.3.0
   port: 8085
   resources:
     requests:
@@ -68,7 +68,7 @@ hlmproxy:
 
 hlmai:
   name: hlm-ai
-  repository: aliakseiashukha/healenium-ai
+  repository: healenium/healenium-ai
   tag: 1.0.0
   port: 6565
   address: http://localhost:6565
@@ -84,7 +84,7 @@ hlmai:
 
 hlmui:
   name: hlm-ui-dashboard
-  repository: aliakseiashukha/hlm-ui-dashboard
+  repository: healenium/hlm-ui-dashboard
   tag: 1.0.0
   port: 5173
   address: http://localhost:5173
